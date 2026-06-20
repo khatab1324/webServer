@@ -126,23 +126,23 @@ namespace server
             std::cout << "Method: " << req.method << '\n';
             std::cout << "Path: " << req.route << '\n';
 
-            std::string fileContent = StaticFileHandler::read(req.route);
+            // std::string fileContent = StaticFileHandler::read(req.route);
             std::cout << "Received request:\n";
             std::cout << buffer << '\n';
 
-            HttpResponse response = HttpResponse(200, "ok", "plain/text", "not init yet");
-            if (req.method != "GET")
+            HttpResponse response = _router.handle(req);
+            if (req.method != "GET" && req.method != "POST")
                 response = HttpResponse::methodNotAllowed();
             else
             {
-                if (fileContent.empty())
-                {
-                    response = HttpResponse::notFound();
-                }
-                else
-                {
-                    response = HttpResponse::okText(fileContent);
-                }
+                // if (fileContent.empty())
+                // {
+                //     response = HttpResponse::notFound();
+                // }
+                // else
+                // {
+                // response = HttpResponse::okText(fileContent);
+                // }
             }
             std::string rawRes = response.toString();
             send(clientSocket, rawRes.c_str(), rawRes.size(), 0);

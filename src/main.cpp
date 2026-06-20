@@ -7,6 +7,8 @@ int main(int argc, char *argv[])
     server::TcpServer app(port);
     app.get("/about", [](const server::HttpRequest &request)
             { return server::HttpResponse::okText("This is the about page"); });
+    app.post("/about", [](const server::HttpRequest &request)
+             { return server::HttpResponse::okText("this post in the about page"); });
     app.start();
     return 0;
 }

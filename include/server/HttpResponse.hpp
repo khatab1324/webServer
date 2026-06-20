@@ -6,9 +6,18 @@ namespace server
 {
     class HttpResponse
     {
+
     public:
-        static std::string okHtml(const std::string &body);
-        static std::string methodNotAllowed();
-        static std::string notFound();
+        HttpResponse(int statusCode, std::string statusText, std::string contentType, std::string body);
+        static HttpResponse okHtml(const std::string &body);
+        static HttpResponse methodNotAllowed();
+        static HttpResponse notFound();
+        std::string toString() const;
+
+    private:
+        int statusCode_;
+        std::string statusText_;
+        std::string contentType_;
+        std::string body_;
     };
-}
+};

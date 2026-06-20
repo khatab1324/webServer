@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <thread>
 
 namespace server
 {
@@ -91,55 +92,62 @@ namespace server
                 std::cerr << "Failed to accept client connection\n";
                 continue;
             }
+            // char clientIp[INET_ADDRSTRLEN];
+            // inet_ntop(
+            //     AF_INET,
+            //     &clientAddress.sin_addr,
+            //     clientIp,
+            //     sizeof(clientIp));
 
-            char clientIp[INET_ADDRSTRLEN];
-            inet_ntop(
-                AF_INET,
-                &clientAddress.sin_addr,
-                clientIp,
-                sizeof(clientIp));
+            // std::cout << "Client connected: " << clientIp << '\n';
 
-            std::cout << "Client connected: " << clientIp << '\n';
+            // this need to be in the client handle
+            std::thread clientThread(
+                &TcpServer::handleClient, this, clientSocket);
+            clientThread.detach();
+        }
+    }
+    void TcpServer::handleClient(int clientSocket)
+    {
 
-            char buffer[4096]{};
+        char buffer[4096]{};
 
-            ssize_t bytesReceived = recv(
-                clientSocket,
-                buffer,
-                sizeof(buffer) - 1,
-                0);
+        ssize_t bytesReceived = recv(
+            clientSocket,
+            buffer,
+            sizeof(buffer) - 1,
+            0);
 
-            if (bytesReceived > 0)
+        if (bytesReceived > 0)
+        {
+            // buffer[bytesReceived] = '\0';
+            std::string rawRequest(buffer);
+            HttpRequest req = HttpRequest::parse(rawRequest);
+            std::cout << "Method: " << req.method << '\n';
+            std::cout << "Path: " << req.route << '\n';
+
+            std::string fileContent = StaticFileHandler::read(req.route);
+            std::cout << "Received request:\n";
+            std::cout << buffer << '\n';
+
+            HttpResponse response = HttpResponse(200, "ok", "plain/text", "not init yet");
+            if (req.method != "GET")
+                response = HttpResponse::methodNotAllowed();
+            else
             {
-                // buffer[bytesReceived] = '\0';
-                std::string rawRequest(buffer);
-                HttpRequest req = HttpRequest::parse(rawRequest);
-                std::cout << "Method: " << req.method << '\n';
-                std::cout << "Path: " << req.path << '\n';
-
-                std::string fileContent = StaticFileHandler::read(req.path);
-                std::cout << "Received request:\n";
-                std::cout << buffer << '\n';
-
-                std::string response;
-                if (req.method != "GET")
-                    response = HttpResponse::methodNotAllowed();
+                if (fileContent.empty())
+                {
+                    response = HttpResponse::notFound();
+                }
                 else
                 {
-                    if (fileContent.empty())
-                    {
-                        response = HttpResponse::notFound();
-                    }
-                    else
-                    {
-                        response = HttpResponse::okHtml(fileContent);
-                    }
+                    response = HttpResponse::okHtml(fileContent);
                 }
-
-                send(clientSocket, response.c_str(), response.size(), 0);
             }
-
-            close(clientSocket);
+            std::string rawRes = response.toString();
+            send(clientSocket, rawRes.c_str(), rawRes.size(), 0);
         }
+
+        close(clientSocket);
     }
 }

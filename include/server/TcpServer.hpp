@@ -23,5 +23,6 @@ namespace server
         void bindSocket();
         void listenForConnection();
         void acceptLoop();
+        void handleClient(int clientSocket);
     };
 }

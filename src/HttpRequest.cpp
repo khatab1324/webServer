@@ -9,7 +9,7 @@ namespace server
         HttpRequest request{};
 
         std::istringstream stream(rawRequest);
-        stream >> request.method >> request.path >> request.version;
+        stream >> request.method >> request.route >> request.version;
 
         return request;
     }

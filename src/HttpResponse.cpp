@@ -1,37 +1,43 @@
 #include "server/HttpResponse.hpp"
-
+#include <sstream>
+#include <utility>
 namespace server
 {
-    std::string HttpResponse::okHtml(const std::string &body)
+    HttpResponse::HttpResponse(
+        int statusCode,
+        std::string statusText,
+        std::string contentType,
+        std::string body) : statusCode_(statusCode),
+                            statusText_(std::move(statusText)),
+                            contentType_(std::move(contentType)),
+                            body_(std::move(body)) {}
+    HttpResponse HttpResponse::okHtml(const std::string &body)
     {
-        return "HTTP/1.1 200 OK\r\n"
-               "Content-Type: text/html\r\n"
-               "Content-Length: " +
-               std::to_string(body.size()) + "\r\n"
-                                             "\r\n" +
-               body;
+        return HttpResponse(200, "ok", "plain/text", body);
     }
 
-    std::string HttpResponse::notFound()
+    HttpResponse HttpResponse::notFound()
     {
         std::string body = "404 Not Found";
 
-        return "HTTP/1.1 404 Not Found\r\n"
-               "Content-Type: text/plain\r\n"
-               "Content-Length: " +
-               std::to_string(body.size()) + "\r\n"
-                                             "\r\n" +
-               body;
+        return HttpResponse(200, "OK", "text/plain", body);
     }
-    std::string HttpResponse::methodNotAllowed()
+    HttpResponse HttpResponse::methodNotAllowed()
     {
         std::string body = "Method not allowed ^_^";
+        return HttpResponse(404, "Not found", "text/plain", body);
+    }
+    std::string HttpResponse::toString() const
+    {
+        std::ostringstream response;
 
-        return "HTTP/1.1 404 Not Found\r\n"
-               "Content-Type: text/plain\r\n"
-               "Content-Length: " +
-               std::to_string(body.size()) + "\r\n"
-                                             "\r\n" +
-               body;
+        response << "HTTP/1.1 " << statusCode_ << " " << statusText_ << "\r\n";
+        response << "Content-Type: " << contentType_ << "\r\n";
+        response << "Content-Length: " << body_.size() << "\r\n";
+        response << "Connection: close\r\n";
+        response << "\r\n";
+        response << body_;
+
+        return response.str();
     }
 }

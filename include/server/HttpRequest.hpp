@@ -7,7 +7,7 @@ namespace server
     struct HttpRequest
     {
         std::string method;
-        std::string path;
+        std::string route;
         std::string version;
 
         static HttpRequest parse(const std::string &rawRequest);

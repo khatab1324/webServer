@@ -13,7 +13,9 @@ namespace server
         {
             path = "/index.html";
         }
-
+        if(path=="/hello"){
+            path="/hello.html";
+        }
         std::ifstream file("public" + path, std::ios::binary);
 
         if (!file)

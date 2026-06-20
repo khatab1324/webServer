@@ -1,5 +1,5 @@
-#include "server/TcpServer.hpp"
 #include <iostream>
+#include "server/TcpServer.hpp"
 #include "server/HttpResponse.hpp"
 int main(int argc, char *argv[])
 {
@@ -8,4 +8,5 @@ int main(int argc, char *argv[])
     app.get("/about", [](const server::HttpRequest &request)
             { return server::HttpResponse::okText("This is the about page"); });
     app.start();
+    return 0;
 }

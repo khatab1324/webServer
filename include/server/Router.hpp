@@ -10,8 +10,8 @@ namespace server
     class Router
     {
     public:
-        void get(std::string &route, RouteHandler routerHandler);
-        void post(std::string &route, RouteHandler routeHandler);
+        void get(const std::string &route, RouteHandler routerHandler);
+        void post(const std::string &route, RouteHandler routeHandler);
         HttpResponse handle(const HttpRequest &request) const;
 
     private:
@@ -21,6 +21,5 @@ namespace server
 
     private:
         std::unordered_map<std::string, RouteHandler> routesMap;
-        
     };
 }

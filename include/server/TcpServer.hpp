@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include "server/Router.hpp"
 
 namespace server
 {
@@ -13,10 +14,13 @@ namespace server
         TcpServer &operator=(const TcpServer &) = delete;
 
         void start();
+        void get(const std::string &route, RouteHandler handler);
+        void post(const std::string &route, RouteHandler handler);
 
     private:
         std::uint16_t _port;
         int _serverSocket;
+        Router _router;
 
     private:
         void createSocket();

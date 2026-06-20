@@ -11,7 +11,7 @@ namespace server
                             statusText_(std::move(statusText)),
                             contentType_(std::move(contentType)),
                             body_(std::move(body)) {}
-    HttpResponse HttpResponse::okHtml(const std::string &body)
+    HttpResponse HttpResponse::okText(const std::string &body)
     {
         return HttpResponse(200, "ok", "plain/text", body);
     }

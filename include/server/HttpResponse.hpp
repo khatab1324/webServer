@@ -9,7 +9,7 @@ namespace server
 
     public:
         HttpResponse(int statusCode, std::string statusText, std::string contentType, std::string body);
-        static HttpResponse okHtml(const std::string &body);
+        static HttpResponse okText(const std::string &body);
         static HttpResponse methodNotAllowed();
         static HttpResponse notFound();
         std::string toString() const;

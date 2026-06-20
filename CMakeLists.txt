@@ -12,6 +12,7 @@ add_executable(webServer
     src/HttpRequest.cpp
     src/HttpResponse.cpp
     src/StaticFileHandler.cpp
+    src/Router.cpp
 )
 
 target_include_directories(webServer

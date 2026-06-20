@@ -141,7 +141,7 @@ namespace server
                 }
                 else
                 {
-                    response = HttpResponse::okHtml(fileContent);
+                    response = HttpResponse::okText(fileContent);
                 }
             }
             std::string rawRes = response.toString();
@@ -149,5 +149,14 @@ namespace server
         }
 
         close(clientSocket);
+    }
+    void TcpServer::get(const std::string &route, RouteHandler handler)
+    {
+        _router.get(route, std::move(handler));
+    }
+
+    void TcpServer::post(const std::string &route, RouteHandler handler)
+    {
+        _router.post(route, std::move(handler));
     }
 }

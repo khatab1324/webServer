@@ -8,5 +8,6 @@ namespace server
     {
     public:
         static std::string read(const std::string &requestPath);
+        static std::string fileStreaming(const std::string &filename);
     };
 }

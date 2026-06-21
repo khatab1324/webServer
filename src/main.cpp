@@ -9,6 +9,11 @@ int main(int argc, char *argv[])
             { return server::HttpResponse::okText("This is the about page"); });
     app.post("/about", [](const server::HttpRequest &request)
              { return server::HttpResponse::okText("this post in the about page"); });
+    app.get("/", [](const server::HttpRequest &request)
+            { return server::HttpResponse::okText("wellcom in the webserver"); });
+    app.get("/hello", [](const server::HttpRequest &request)
+            { server::HttpResponse response;
+                return server::HttpResponse::okHtml("hello.html"); });
     app.start();
     return 0;
 }

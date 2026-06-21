@@ -12,6 +12,8 @@ namespace server
         static HttpResponse okText(const std::string &body);
         static HttpResponse methodNotAllowed();
         static HttpResponse notFound();
+        static HttpResponse okHtml(const std::string &filename);
+
         std::string toString() const;
 
     private:

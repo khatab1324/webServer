@@ -1,4 +1,5 @@
 #include "server/HttpResponse.hpp"
+#include "server/StaticFileHandler.hpp"
 #include <sstream>
 #include <utility>
 namespace server
@@ -13,9 +14,13 @@ namespace server
                             body_(std::move(body)) {}
     HttpResponse HttpResponse::okText(const std::string &body)
     {
-        return HttpResponse(200, "ok", "plain/text", body);
+        return HttpResponse(200, "ok", "text/plain", body);
     }
-
+    HttpResponse HttpResponse::okHtml(const std::string &filename)
+    {
+        std::string fileContent = StaticFileHandler::fileStreaming(filename);
+        return HttpResponse(200, "ok", "text/html", fileContent);
+    }
     HttpResponse HttpResponse::notFound()
     {
         std::string body = "404 Not Found";

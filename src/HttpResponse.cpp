@@ -10,34 +10,36 @@ namespace server
         std::string contentType,
         std::string body) : statusCode_(statusCode),
                             statusText_(std::move(statusText)),
-                            contentType_(std::move(contentType)),
-                            body_(std::move(body)) {}
+                            body_(std::move(body))
+    {
+        headerType_["Content-Type"] = contentType;
+    }
     HttpResponse HttpResponse::okText(const std::string &body)
     {
-        return HttpResponse(200, "ok", "text/plain", body);
+        return HttpResponse(200, "OK", "text/plain", body);
     }
     HttpResponse HttpResponse::okHtml(const std::string &filename)
     {
         std::string fileContent = StaticFileHandler::fileStreaming(filename);
-        return HttpResponse(200, "ok", "text/html", fileContent);
+        return HttpResponse(200, "OK", "text/html", fileContent);
     }
     HttpResponse HttpResponse::notFound()
     {
         std::string body = "404 Not Found";
 
-        return HttpResponse(200, "OK", "text/plain", body);
+        return HttpResponse(404, "Not Found", "text/plain", body);
     }
     HttpResponse HttpResponse::methodNotAllowed()
     {
         std::string body = "Method not allowed ^_^";
-        return HttpResponse(404, "Not found", "text/plain", body);
+        return HttpResponse(405, "Not found", "text/plain", body);
     }
     std::string HttpResponse::toString() const
     {
         std::ostringstream response;
 
         response << "HTTP/1.1 " << statusCode_ << " " << statusText_ << "\r\n";
-        response << "Content-Type: " << contentType_ << "\r\n";
+        response << "Content-Type: " << "text/plain" << "\r\n";
         response << "Content-Length: " << body_.size() << "\r\n";
         response << "Connection: close\r\n";
         response << "\r\n";
@@ -45,4 +47,24 @@ namespace server
 
         return response.str();
     }
+
+    void HttpResponse::status(int statusCode)
+    {
+        // todo: add defualt status
+        statusCode_ = statusCode;
+    }
+    void HttpResponse::status(int statusCode, const std::string &text)
+    {
+        statusText_ = text;
+        statusCode_ = statusCode;
+    }
+    void HttpResponse::setHeader(const std::string &contantTypeName, const std::string &contantType)
+    {
+        headerType_[contantTypeName] = contantType;
+    }
+    void HttpResponse::send(const std::string &body)
+    {
+        body_ = body;
+    }
+
 }

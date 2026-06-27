@@ -9,8 +9,7 @@ namespace server
           statusText_("OK"),
           body_("")
     {
-        headerType_["Content-Type"] = "text/plain";
-    }
+        }
 
     HttpResponse::HttpResponse(
         int statusCode,
@@ -81,9 +80,13 @@ namespace server
     void HttpResponse::sendHtmlFile(const std::string &filename)
     {
         std::string fileContent = StaticFileHandler::fileStreaming(filename);
-        statusCode_ = 200;
-        statusText_ = "OK";
-        setHeader("Content-Type", "text/html");
+        if (!statusCode_)
+        {
+            statusCode_ = 200;
+            statusText_ = "OK";
+        }
+        if (headerType_["Content-Type"].empty())
+            setHeader("Content-Type", "text/html");
 
         body_ = fileContent;
     };

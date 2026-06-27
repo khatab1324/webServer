@@ -4,6 +4,14 @@
 #include <utility>
 namespace server
 {
+    HttpResponse::HttpResponse()
+        : statusCode_(200),
+          statusText_("OK"),
+          body_("")
+    {
+        headerType_["Content-Type"] = "text/plain";
+    }
+
     HttpResponse::HttpResponse(
         int statusCode,
         std::string statusText,
@@ -39,7 +47,11 @@ namespace server
         std::ostringstream response;
 
         response << "HTTP/1.1 " << statusCode_ << " " << statusText_ << "\r\n";
-        response << "Content-Type: " << "text/plain" << "\r\n";
+        // response << "Content-Type: " << "text/plain" << "\r\n";
+        for (const auto &[name, value] : headerType_)
+        {
+            response << name << ": " << value << "\r\n";
+        }
         response << "Content-Length: " << body_.size() << "\r\n";
         response << "Connection: close\r\n";
         response << "\r\n";
@@ -66,5 +78,13 @@ namespace server
     {
         body_ = body;
     }
+    void HttpResponse::sendHtmlFile(const std::string &filename)
+    {
+        std::string fileContent = StaticFileHandler::fileStreaming(filename);
+        statusCode_ = 200;
+        statusText_ = "OK";
+        setHeader("Content-Type", "text/html");
 
+        body_ = fileContent;
+    };
 }

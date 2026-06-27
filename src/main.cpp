@@ -14,8 +14,8 @@ int main(int argc, char *argv[])
         app.get("/hello", [](const server::HttpRequest &request)
                 { server::HttpResponse response;
                 // response.status(200);
-                response.setHeader("Content-Type", "text/plain");
-                response.sendHtmlFile("/hello.html");
+                response.status(201).sendHtmlFile("/hello.html");
+
                 return response; });
         app.start();
         return 0;

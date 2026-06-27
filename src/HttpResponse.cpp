@@ -9,7 +9,7 @@ namespace server
           statusText_("OK"),
           body_("")
     {
-        }
+    }
 
     HttpResponse::HttpResponse(
         int statusCode,
@@ -59,25 +59,29 @@ namespace server
         return response.str();
     }
 
-    void HttpResponse::status(int statusCode)
+    HttpResponse &HttpResponse::status(int statusCode)
     {
         // todo: add defualt status
         statusCode_ = statusCode;
+        return *this;
     }
-    void HttpResponse::status(int statusCode, const std::string &text)
+    HttpResponse &HttpResponse::status(int statusCode, const std::string &text)
     {
         statusText_ = text;
         statusCode_ = statusCode;
+        return *this;
     }
-    void HttpResponse::setHeader(const std::string &contantTypeName, const std::string &contantType)
+    HttpResponse &HttpResponse::setHeader(const std::string &contantTypeName, const std::string &contantType)
     {
         headerType_[contantTypeName] = contantType;
+        return *this;
     }
-    void HttpResponse::send(const std::string &body)
+    HttpResponse &HttpResponse::send(const std::string &body)
     {
         body_ = body;
+        return *this;
     }
-    void HttpResponse::sendHtmlFile(const std::string &filename)
+    HttpResponse &HttpResponse::sendHtmlFile(const std::string &filename)
     {
         std::string fileContent = StaticFileHandler::fileStreaming(filename);
         if (!statusCode_)
@@ -89,5 +93,6 @@ namespace server
             setHeader("Content-Type", "text/html");
 
         body_ = fileContent;
+        return *this;
     };
 }

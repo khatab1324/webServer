@@ -12,11 +12,11 @@ namespace server
         HttpResponse(int statusCode, std::string statusText, std::string contentType, std::string body);
 
     public:
-        void status(int statusCode);
-        void status(int statusCode, const std::string &text);
-        void setHeader(const std::string &contantTypeName, const std::string &contantType);
-        void send(const std::string &body);
-        void sendHtmlFile(const std::string &filename);
+        HttpResponse &status(int statusCode);
+        HttpResponse &status(int statusCode, const std::string &text);
+        HttpResponse &setHeader(const std::string &contantTypeName, const std::string &contantType);
+        HttpResponse &send(const std::string &body);
+        HttpResponse &sendHtmlFile(const std::string &filename);
 
     public:
         static HttpResponse okText(const std::string &body);

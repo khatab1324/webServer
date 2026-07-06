@@ -14,8 +14,11 @@ int main(int argc, char *argv[])
         app.get("/hello", [](const server::HttpRequest &request)
                 { server::HttpResponse response;
                 // response.status(200);
-                response.status(201).sendHtmlFile("/hello.html");
-
+                response.status(200).sendHtmlFile("/hello.html");
+                return response; });
+        app.post("/hello", [](const server::HttpRequest &request)
+                 { server::HttpResponse response;
+                        std::cout<<"body :"<<request.body<<std::endl;
                 return response; });
         app.start();
         return 0;

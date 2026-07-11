@@ -16,8 +16,9 @@ int main(int argc, char *argv[])
         try
         {
                 server::JsRuntime js;
-                js.runCode("console.print('hello','world','shheeee')");
-                js.runCode("const x=3; x+3;4+4");
+                // js.runCode("console.print('hello','world','shheeee')");
+                // js.runCode("const x=3; x+3;4+4");
+                js.runFile("main.js");
                 std::cout
                     << "QuickJS runtime created successfully\n";
         }
@@ -30,7 +31,7 @@ int main(int argc, char *argv[])
         app.get("/hello", [](const server::HttpRequest &request)
                 { server::HttpResponse response;
                 // response.status(200);
-                response.status(200).sendHtmlFile("/hello.html");
+                response.status(200).setHeader("Contant-Type","text/plain").send("<h1>hello</h1>");
                 return response; });
         app.post("/hello", [](const server::HttpRequest &request)
                  { server::HttpResponse response;

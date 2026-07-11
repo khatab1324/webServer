@@ -2,7 +2,8 @@
 #include <quickjs.h>
 #include <stdexcept>
 #include <iostream>
-
+#include <fstream>
+#include <sstream>
 namespace server
 {
     static JSValue jsConsoleLog(
@@ -69,6 +70,7 @@ namespace server
             JS_FreeValue(context_, result);
             return false;
         }
+        // TODO:here just for print i will remove it
         const char *resultString = JS_ToCString(context_, result);
         if (resultString)
         {
@@ -77,6 +79,22 @@ namespace server
         }
         JS_FreeValue(context_, result);
         return true;
+    }
+    bool JsRuntime::runFile(const std::string &filename)
+    {
+        std::string mainPath = "scripts/";
+        std::ifstream file(mainPath + filename);
+        if (!file.is_open())
+        {
+            std::cerr << "can't open js file" << filename << std::endl;
+            return false;
+        }
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+
+        std::string code = buffer.str();
+
+        return runCode(code);
     }
     void JsRuntime::printException()
     {

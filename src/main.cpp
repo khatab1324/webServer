@@ -1,6 +1,8 @@
 #include <iostream>
 #include "server/TcpServer.hpp"
 #include "server/HttpResponse.hpp"
+#include "js/JsRuntime.hpp"
+
 int main(int argc, char *argv[])
 {
         std::uint16_t port = 8080;
@@ -11,6 +13,20 @@ int main(int argc, char *argv[])
         //          { return server::HttpResponse::okText("this post in the about page"); });
         // app.get("/", [](const server::HttpRequest &request)
         //         { return server::HttpResponse::okText("wellcom in the webserver"); });
+        try
+        {
+                server::JsRuntime js;
+                js.runCode("console.print('hello','world','shheeee')");
+                js.runCode("const x=3; x+3;4+4");
+                std::cout
+                    << "QuickJS runtime created successfully\n";
+        }
+        catch (const std::exception &error)
+        {
+                std::cerr << "Error: " << error.what() << '\n';
+                return 1;
+        }
+
         app.get("/hello", [](const server::HttpRequest &request)
                 { server::HttpResponse response;
                 // response.status(200);

@@ -101,10 +101,12 @@ namespace server
 
             // std::cout << "Client connected: " << clientIp << '\n';
 
-            // this need to be in the client handle
-            std::thread clientThread(
-                &TcpServer::handleClient, this, clientSocket);
-            clientThread.detach();
+            // todo : for some resone quick js can't catch the clientThread , fix this by making quick js running on worker thread not main thread
+            //  this need to be in the client handle
+            //  std::thread clientThread(
+            //      &TcpServer::handleClient, this, clientSocket);
+            //  clientThread.detach();
+            handleClient(clientSocket);
         }
     }
     void TcpServer::handleClient(int clientSocket)

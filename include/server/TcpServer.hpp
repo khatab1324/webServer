@@ -17,7 +17,7 @@ namespace server
         void get(const std::string &route, RouteHandler handler);
         void post(const std::string &route, RouteHandler handler);
 
-    private:
+    public:
         std::uint16_t _port;
         int _serverSocket;
         Router _router;

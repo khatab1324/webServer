@@ -5,10 +5,11 @@ struct JSRuntime;
 struct JSContext;
 namespace server
 {
+    class TcpServer;
     class JsRuntime
     {
     public:
-        JsRuntime();
+        explicit JsRuntime(TcpServer &server_);
         ~JsRuntime();
 
         JsRuntime(const JsRuntime &) = delete;
@@ -20,8 +21,11 @@ namespace server
     private:
         JSRuntime *runtime_ = nullptr;
         JSContext *context_ = nullptr;
+        TcpServer &server_;
 
         void registerConsole();
+        void registerServer();
+
         void printException();
     };
 }

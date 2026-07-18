@@ -15,12 +15,13 @@ int main(int argc, char *argv[])
         //         { return server::HttpResponse::okText("wellcom in the webserver"); });
         try
         {
-                server::JsRuntime js;
+                server::JsRuntime js(app);
                 // js.runCode("console.print('hello','world','shheeee')");
                 // js.runCode("const x=3; x+3;4+4");
                 js.runFile("main.js");
                 std::cout
                     << "QuickJS runtime created successfully\n";
+                app.start();
         }
         catch (const std::exception &error)
         {
@@ -37,6 +38,5 @@ int main(int argc, char *argv[])
                  { server::HttpResponse response;
                         std::cout<<"body :"<<request.body<<std::endl;
                 return response; });
-        app.start();
         return 0;
 }

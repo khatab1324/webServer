@@ -14,5 +14,7 @@ server.get("/like", function (req, res) {
     res.send("thanks ^_^");
 })
 server.post("/postreq", function (req, res) {
-    res.send('what here ?');
+    console.print(req.body);
+    
+    res.send(`what here ? ${req.body}`);
 })

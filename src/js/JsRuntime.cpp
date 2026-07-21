@@ -53,14 +53,61 @@ namespace server
             return JS_ThrowInternalError(ctx, "there is no response have beed init");
 
         const char *body = JS_ToCString(ctx, argv[0]);
+        // for (int i = 0; i < argc; i++)
+        // {
+        //     std::cout << "___" << JS_ToCString(ctx, argv[i]) << std::endl;
+        // }
+        // todo fix this to make it throw erro when args more then one in send method
+        if (argc > 1)
+            JS_ThrowInternalError(ctx, "the send function should have one arg");
         if (!body)
             return JS_EXCEPTION;
-
+        // todo: this just for now hard coded , i will make it chain obj
         currentResponse->status(200)
             .setHeader("Content-Type", "text/plain")
             .send(body);
 
         JS_FreeCString(ctx, body);
+
+        return JS_UNDEFINED;
+    }
+    static JSValue jsServerRouteHandlerPost(JSContext *ctx,
+                                            JSValueConst thisVal,
+                                            int argc,
+                                            JSValueConst *argv)
+    {
+        TcpServer *server = static_cast<TcpServer *>(JS_GetContextOpaque(ctx));
+        JSValue jsHandler = JS_DupValue(ctx, argv[1]);
+        const char *route = JS_ToCString(ctx, argv[0]);
+        server->post(route, [ctx, jsHandler](const HttpRequest &req) -> HttpResponse
+                     {
+            HttpResponse response;
+            currentResponse = &response;
+
+            JSValue reqObj = JS_NewObject(ctx);
+            JSValue resObj = JS_NewObject(ctx);
+//here i deal with res
+            // JS_SetOpaque(resObj,&response);
+            JSValue args[] = { reqObj, resObj };
+            JS_SetPropertyStr(ctx, resObj, "send", JS_NewCFunction(ctx,sendResponse , "send", 1));
+//here i deal with req
+            JS_SetPropertyStr(ctx,reqObj,"method",JS_NewString(ctx,req.method.c_str()));
+            JS_SetPropertyStr(ctx,reqObj,"body",JS_NewString(ctx,req.body.c_str()));
+            JS_SetPropertyStr(ctx,reqObj,"route",JS_NewString(ctx,req.route.c_str()));
+
+            JSValue result = JS_Call(ctx, jsHandler, JS_UNDEFINED, 2, args);//this will be like calling a function in js and if the handler return nothing it will be undifinde
+//like  server.get("/hello", function (req, res) {
+//   res.send("hello")
+// return 1; -> the result will be 1
+// })
+            JS_FreeValue(ctx, result);
+            JS_FreeValue(ctx, reqObj);
+            JS_FreeValue(ctx, resObj);
+            currentResponse = nullptr;
+
+            return response; });
+
+        JS_FreeCString(ctx, route);
 
         return JS_UNDEFINED;
     }
@@ -71,10 +118,7 @@ namespace server
         int argc,
         JSValueConst *argv)
     {
-        (void)ctx;
-        (void)thisVal;
-        (void)argc;
-        (void)argv;
+
         // my plan
 
         // argv[0] => router path "/hello"
@@ -100,7 +144,7 @@ namespace server
                         JS_SetPropertyStr(ctx, resObj, "send", JS_NewCFunction(ctx,sendResponse , "send", 1));
 //here i deal with req
                         JS_SetPropertyStr(ctx,reqObj,"method",JS_NewString(ctx,req.method.c_str()));
-                        JS_SetPropertyStr(ctx,reqObj,"body",JS_NewString(ctx,req.body.c_str()));
+                        // JS_SetPropertyStr(ctx,reqObj,"body",JS_NewString(ctx,req.body.c_str()));
                         JS_SetPropertyStr(ctx,reqObj,"route",JS_NewString(ctx,req.route.c_str()));
 
                         JSValue result = JS_Call(ctx, jsHandler, JS_UNDEFINED, 2, args);//this will be like calling a function in js and if the handler return nothing it will be undifinde
@@ -203,6 +247,7 @@ namespace server
         JSValue global = JS_GetGlobalObject(context_);
         JSValue server = JS_NewObject(context_);
         JS_SetPropertyStr(context_, server, "get", JS_NewCFunction(context_, jsServerRouteHandlerGet, "get", 1));
+        JS_SetPropertyStr(context_, server, "post", JS_NewCFunction(context_, jsServerRouteHandlerPost, "post", 1));
         JS_SetPropertyStr(context_, global, "server", server);
         JS_FreeValue(context_, global);
     }

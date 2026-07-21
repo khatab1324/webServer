@@ -41,6 +41,26 @@ namespace server
 
         return JS_UNDEFINED;
     }
+
+    static JSValue sendStatus(
+        JSContext *ctx,
+        JSValueConst thisVal,
+        int argc,
+        JSValueConst *argv)
+    {
+        int32_t statusCode;
+        if (argc < 1)
+            return JS_ThrowInternalError(ctx, "the status should at least have one args");
+        JS_ToInt32(ctx, &statusCode, argv[0]);
+        JS_SetPropertyStr(
+            ctx,
+            thisVal,
+            "statusCode",
+            JS_NewInt32(ctx, statusCode));
+        // i return thisValue and it will contain the obj , so this will achive the chain behaiver
+        return JS_DupValue(ctx, thisVal);
+    }
+
     static JSValue sendResponse(
         JSContext *ctx,
         JSValueConst thisVal,
@@ -48,7 +68,18 @@ namespace server
         JSValueConst *argv)
     {
         (void)thisVal;
+        JSValue statusCode = JS_GetPropertyStr(ctx, thisVal, "statusCode");
+        int32_t defaultStatus = 201;
 
+        if (!JS_IsUndefined(statusCode))
+        {
+            // statusCode = 200;//this not work you need to use this to js values
+            if (JS_ToInt32(ctx, &defaultStatus, statusCode) < 0)
+            {
+                JS_FreeValue(ctx, statusCode);
+                return JS_ThrowInternalError(ctx, "the statusCode not init");
+            }
+        }
         if (!currentResponse)
             return JS_ThrowInternalError(ctx, "there is no response have beed init");
 
@@ -63,10 +94,10 @@ namespace server
         if (!body)
             return JS_EXCEPTION;
         // todo: this just for now hard coded , i will make it chain obj
-        currentResponse->status(200)
+        JS_FreeValue(ctx, statusCode);
+        currentResponse->status(defaultStatus)
             .setHeader("Content-Type", "text/plain")
             .send(body);
-
         JS_FreeCString(ctx, body);
 
         return JS_UNDEFINED;
@@ -90,6 +121,7 @@ namespace server
             // JS_SetOpaque(resObj,&response);
             JSValue args[] = { reqObj, resObj };
             JS_SetPropertyStr(ctx, resObj, "send", JS_NewCFunction(ctx,sendResponse , "send", 1));
+            JS_SetPropertyStr(ctx,resObj,"status", JS_NewCFunction(ctx, sendStatus, "status", 1));
 //here i deal with req
             JS_SetPropertyStr(ctx,reqObj,"method",JS_NewString(ctx,req.method.c_str()));
             JS_SetPropertyStr(ctx,reqObj,"body",JS_NewString(ctx,req.body.c_str()));
@@ -100,6 +132,7 @@ namespace server
 //   res.send("hello")
 // return 1; -> the result will be 1
 // })
+
             JS_FreeValue(ctx, result);
             JS_FreeValue(ctx, reqObj);
             JS_FreeValue(ctx, resObj);
@@ -132,6 +165,7 @@ namespace server
         TcpServer *server = static_cast<TcpServer *>(JS_GetContextOpaque(ctx));
         JSValue jsHandler = JS_DupValue(ctx, argv[1]);
         const char *route = JS_ToCString(ctx, argv[0]);
+
         server->get(route, [ctx, jsHandler](const HttpRequest &req) -> HttpResponse
                     {HttpResponse response;
                         currentResponse = &response;
@@ -142,6 +176,8 @@ namespace server
                         // JS_SetOpaque(resObj,&response);
                         JSValue args[] = { reqObj, resObj };
                         JS_SetPropertyStr(ctx, resObj, "send", JS_NewCFunction(ctx,sendResponse , "send", 1));
+                        JS_SetPropertyStr(ctx,resObj,"status", JS_NewCFunction(ctx, sendStatus, "status", 1));
+
 //here i deal with req
                         JS_SetPropertyStr(ctx,reqObj,"method",JS_NewString(ctx,req.method.c_str()));
                         // JS_SetPropertyStr(ctx,reqObj,"body",JS_NewString(ctx,req.body.c_str()));
@@ -246,8 +282,8 @@ namespace server
     {
         JSValue global = JS_GetGlobalObject(context_);
         JSValue server = JS_NewObject(context_);
-        JS_SetPropertyStr(context_, server, "get", JS_NewCFunction(context_, jsServerRouteHandlerGet, "get", 1));
-        JS_SetPropertyStr(context_, server, "post", JS_NewCFunction(context_, jsServerRouteHandlerPost, "post", 1));
+        JS_SetPropertyStr(context_, server, "get", JS_NewCFunction(context_, jsServerRouteHandlerGet, "get", 2));
+        JS_SetPropertyStr(context_, server, "post", JS_NewCFunction(context_, jsServerRouteHandlerPost, "post", 2));
         JS_SetPropertyStr(context_, global, "server", server);
         JS_FreeValue(context_, global);
     }
@@ -263,5 +299,4 @@ namespace server
         JS_SetPropertyStr(context_, global, "console", console);
         JS_FreeValue(context_, global);
     }
-
 }
